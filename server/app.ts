@@ -10,6 +10,7 @@ app.get("/test", c => {
     return c.json({"message": "test"});
 })
 
-app.route("/api/rooms", roomRoute);
+const apiRoutes = app.basePath("/api").route("/rooms", roomRoute);
 
 export default app
+export type ApiRoutes = typeof apiRoutes;
