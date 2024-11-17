@@ -6,7 +6,6 @@ import { z } from 'zod';
 const roomSchema = z.object({
     id: z.number().int().positive().min(1),
     title: z.string().min(2).max(30),
-    username: z.string().min(3).max(17),
     width: z.number().int().positive(),
     height: z.number().int().positive(),
 })
@@ -16,10 +15,10 @@ type Room = z.infer<typeof roomSchema>
 const createRoomSchema = roomSchema.omit({id: true});
 
 const fakeRoom = [
-    { id: 1, title: "Tattoo shop st", username: "Flora", width: 3, height: 4 },
-    { id: 2, title: "just ordinary room", username: "Jin", width: 6, height: 5 },
-    { id: 3, title: "Teenager room", username: "Kevin02", width: 5, height: 2 },
-    { id: 3, title: "Luxury room", username: "Han", width: 7, height: 4 },
+    { id: 1, title: "Tattoo shop st", width: 3, height: 4 },
+    { id: 2, title: "just ordinary room", width: 6, height: 5 },
+    { id: 3, title: "Teenager room", width: 5, height: 2 },
+    { id: 3, title: "Luxury room", width: 7, height: 4 },
 ]
 
 export const roomRoute = new Hono()
