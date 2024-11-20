@@ -1,22 +1,32 @@
-import { createRootRoute, Link, Outlet } from '@tanstack/react-router'
+import { QueryClient } from '@tanstack/react-query'
+import { createRootRouteWithContext, Link, Outlet } from '@tanstack/react-router'
 // import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 
-export const Route = createRootRoute({
+interface MyRouterContext {
+    queryClient: QueryClient
+}
+
+export const Route = createRootRouteWithContext<MyRouterContext>()({
     component: Root,
 })
 
 function Navbar() {
     return (
-        <div className='p-2 flex gap-2'>
-            <Link to="/" className="[&.active]:font-bold">
-                Home
-            </Link>{' '}
-            <Link to="/library" className="[&.active]:font-bold">
-                Library
+        <div className='p-2 flex justify-between max-w-2xl m-auto items-baseline'>
+            <Link to="/">
+                <h1 className='text-2xl font-bold'>HoemMood</h1>
             </Link>
-            <Link to="/create-room" className="[&.active]:font-bold">
-                Create
-            </Link>
+            <div className='p-2 flex gap-2'>
+                <Link to="/library" className="[&.active]:font-bold">
+                    Library
+                </Link>
+                <Link to="/create-room" className="[&.active]:font-bold">
+                    Create
+                </Link>
+                <Link to="/profile" className="[&.active]:font-bold">
+                    Profile
+                </Link>
+            </div>
         </div>
     )
 }
@@ -26,8 +36,9 @@ function Root() {
         <>
             <Navbar />
             <hr />
-            <Outlet />
-            {/* <TanStackRouterDevtools /> */}
+            <div className='p-2 gap-2 max-w-2xl m-auto'>
+                <Outlet />
+            </div>
         </>
     )
 }

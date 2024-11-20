@@ -11,98 +11,177 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as LibraryImport } from './routes/library'
-import { Route as CreateRoomImport } from './routes/create-room'
-import { Route as IndexImport } from './routes/index'
+import { Route as AuthenticatedImport } from './routes/_authenticated'
+import { Route as AuthenticatedIndexImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedProfileImport } from './routes/_authenticated/profile'
+import { Route as AuthenticatedLibraryImport } from './routes/_authenticated/library'
+import { Route as AuthenticatedCreateRoomIndexImport } from './routes/_authenticated/create-room/index'
+import { Route as AuthenticatedCreateRoomIdImport } from './routes/_authenticated/create-room/$id'
 
 // Create/Update Routes
 
-const LibraryRoute = LibraryImport.update({
-  id: '/library',
-  path: '/library',
+const AuthenticatedRoute = AuthenticatedImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRoute,
 } as any)
 
-const CreateRoomRoute = CreateRoomImport.update({
-  id: '/create-room',
-  path: '/create-room',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const IndexRoute = IndexImport.update({
+const AuthenticatedIndexRoute = AuthenticatedIndexImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+
+const AuthenticatedProfileRoute = AuthenticatedProfileImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+
+const AuthenticatedLibraryRoute = AuthenticatedLibraryImport.update({
+  id: '/library',
+  path: '/library',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+
+const AuthenticatedCreateRoomIndexRoute =
+  AuthenticatedCreateRoomIndexImport.update({
+    id: '/create-room/',
+    path: '/create-room/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+
+const AuthenticatedCreateRoomIdRoute = AuthenticatedCreateRoomIdImport.update({
+  id: '/create-room/$id',
+  path: '/create-room/$id',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexImport
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AuthenticatedImport
       parentRoute: typeof rootRoute
     }
-    '/create-room': {
-      id: '/create-room'
-      path: '/create-room'
-      fullPath: '/create-room'
-      preLoaderRoute: typeof CreateRoomImport
-      parentRoute: typeof rootRoute
-    }
-    '/library': {
-      id: '/library'
+    '/_authenticated/library': {
+      id: '/_authenticated/library'
       path: '/library'
       fullPath: '/library'
-      preLoaderRoute: typeof LibraryImport
-      parentRoute: typeof rootRoute
+      preLoaderRoute: typeof AuthenticatedLibraryImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    '/_authenticated/profile': {
+      id: '/_authenticated/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthenticatedProfileImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    '/_authenticated/': {
+      id: '/_authenticated/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedIndexImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    '/_authenticated/create-room/$id': {
+      id: '/_authenticated/create-room/$id'
+      path: '/create-room/$id'
+      fullPath: '/create-room/$id'
+      preLoaderRoute: typeof AuthenticatedCreateRoomIdImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    '/_authenticated/create-room/': {
+      id: '/_authenticated/create-room/'
+      path: '/create-room'
+      fullPath: '/create-room'
+      preLoaderRoute: typeof AuthenticatedCreateRoomIndexImport
+      parentRoute: typeof AuthenticatedImport
     }
   }
 }
 
 // Create and export the route tree
 
+interface AuthenticatedRouteChildren {
+  AuthenticatedLibraryRoute: typeof AuthenticatedLibraryRoute
+  AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedCreateRoomIdRoute: typeof AuthenticatedCreateRoomIdRoute
+  AuthenticatedCreateRoomIndexRoute: typeof AuthenticatedCreateRoomIndexRoute
+}
+
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedLibraryRoute: AuthenticatedLibraryRoute,
+  AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedCreateRoomIdRoute: AuthenticatedCreateRoomIdRoute,
+  AuthenticatedCreateRoomIndexRoute: AuthenticatedCreateRoomIndexRoute,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
+
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/create-room': typeof CreateRoomRoute
-  '/library': typeof LibraryRoute
+  '': typeof AuthenticatedRouteWithChildren
+  '/library': typeof AuthenticatedLibraryRoute
+  '/profile': typeof AuthenticatedProfileRoute
+  '/': typeof AuthenticatedIndexRoute
+  '/create-room/$id': typeof AuthenticatedCreateRoomIdRoute
+  '/create-room': typeof AuthenticatedCreateRoomIndexRoute
 }
 
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/create-room': typeof CreateRoomRoute
-  '/library': typeof LibraryRoute
+  '/library': typeof AuthenticatedLibraryRoute
+  '/profile': typeof AuthenticatedProfileRoute
+  '/': typeof AuthenticatedIndexRoute
+  '/create-room/$id': typeof AuthenticatedCreateRoomIdRoute
+  '/create-room': typeof AuthenticatedCreateRoomIndexRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
-  '/': typeof IndexRoute
-  '/create-room': typeof CreateRoomRoute
-  '/library': typeof LibraryRoute
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/_authenticated/library': typeof AuthenticatedLibraryRoute
+  '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/create-room/$id': typeof AuthenticatedCreateRoomIdRoute
+  '/_authenticated/create-room/': typeof AuthenticatedCreateRoomIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/create-room' | '/library'
+  fullPaths:
+    | ''
+    | '/library'
+    | '/profile'
+    | '/'
+    | '/create-room/$id'
+    | '/create-room'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/create-room' | '/library'
-  id: '__root__' | '/' | '/create-room' | '/library'
+  to: '/library' | '/profile' | '/' | '/create-room/$id' | '/create-room'
+  id:
+    | '__root__'
+    | '/_authenticated'
+    | '/_authenticated/library'
+    | '/_authenticated/profile'
+    | '/_authenticated/'
+    | '/_authenticated/create-room/$id'
+    | '/_authenticated/create-room/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  CreateRoomRoute: typeof CreateRoomRoute
-  LibraryRoute: typeof LibraryRoute
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  CreateRoomRoute: CreateRoomRoute,
-  LibraryRoute: LibraryRoute,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
 }
 
 export const routeTree = rootRoute
@@ -115,19 +194,38 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/",
-        "/create-room",
-        "/library"
+        "/_authenticated"
       ]
     },
-    "/": {
-      "filePath": "index.tsx"
+    "/_authenticated": {
+      "filePath": "_authenticated.tsx",
+      "children": [
+        "/_authenticated/library",
+        "/_authenticated/profile",
+        "/_authenticated/",
+        "/_authenticated/create-room/$id",
+        "/_authenticated/create-room/"
+      ]
     },
-    "/create-room": {
-      "filePath": "create-room.tsx"
+    "/_authenticated/library": {
+      "filePath": "_authenticated/library.tsx",
+      "parent": "/_authenticated"
     },
-    "/library": {
-      "filePath": "library.tsx"
+    "/_authenticated/profile": {
+      "filePath": "_authenticated/profile.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/": {
+      "filePath": "_authenticated/index.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/create-room/$id": {
+      "filePath": "_authenticated/create-room/$id.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/create-room/": {
+      "filePath": "_authenticated/create-room/index.tsx",
+      "parent": "/_authenticated"
     }
   }
 }

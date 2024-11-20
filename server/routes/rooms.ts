@@ -1,58 +1,59 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
-import { z } from 'zod';
-
-
-const roomSchema = z.object({
-    id: z.number().int().positive().min(1),
-    title: z.string().min(2).max(30),
-    width: z.number().int().positive(),
-    height: z.number().int().positive(),
-})
-
-type Room = z.infer<typeof roomSchema>
-
-const createRoomSchema = roomSchema.omit({id: true});
-
-const fakeRoom = [
-    { id: 1, title: "Tattoo shop st", width: 3, height: 4 },
-    { id: 2, title: "just ordinary room", width: 6, height: 5 },
-    { id: 3, title: "Teenager room", width: 5, height: 2 },
-    { id: 3, title: "Luxury room", width: 7, height: 4 },
-]
+import { getUser } from "../kinde";
+import { db } from "../db";
+import { rooms as roomTable, insertRoomsSchema } from "../db/schema/rooms";
+import { eq, desc, and } from "drizzle-orm";
+import { createRoomSchema } from "../sharedTypes";
 
 export const roomRoute = new Hono()
-    .get('/', async (c) => {
-        // await new Promise((r) => setTimeout(r, 10000));
-        return c.json({ rooms: fakeRoom });
+    .get('/', getUser, async (c) => {
+        const user = c.var.user;
+
+        const rooms = await db.select().from(roomTable).where(and(eq(roomTable.userId, user.id), eq(roomTable.isPrivate, false))).orderBy(desc(roomTable.createdAt)).limit(100);
+        
+        return c.json({ rooms: rooms });
     })
-    .post('/', zValidator("json", createRoomSchema), async (c) => {
+    .post('/', getUser, zValidator("json", createRoomSchema), async (c) => {
         const room = await c.req.valid('json');
-        fakeRoom.push({ ...room, id: fakeRoom.length + 1 });
+        const user = c.var.user;
+
+        const validatedRooms = insertRoomsSchema.parse({
+            ...room,
+            userId: user.id
+        });
+
+        const result = await db.insert(roomTable).values(validatedRooms).returning().then((res) => res[0]);
+
         c.status(201) 
-        return c.json(room);
+        return c.json(result);
     })
-    .get('/room-amount', async (c) => {
-        const rooms = fakeRoom.length;
+    .get('/room-amount', getUser, async (c) => {
+        const user = c.var.user;
+        const rooms = (await db.select().from(roomTable).where(eq(roomTable.isPrivate, false))).length;
+        
         return c.json({ rooms });
     })
-    .get('/:id{[0-9]+}', async (c) => {
+    .get('/:id{[0-9]+}', getUser, async (c) => {
         const id = Number.parseInt(c.req.param("id"));
-        const room = fakeRoom.find(room => room.id === id);
+        const user = c.var.user;
+
+        const room = await db.select().from(roomTable).where(and(eq(roomTable.userId, user.id), eq(roomTable.id, id))).then(res => res[0]);
 
         if (!room) {
             return c.notFound();
         }
         return c.json({ room });
     })
-    .delete('/:id{[0-9]+}', async (c) => {
+    .delete('/:id{[0-9]+}', getUser, async (c) => {
         const id = Number.parseInt(c.req.param("id"));
-        const index = fakeRoom.findIndex(room => room.id === id);
+        const user = c.var.user;
 
-        if (index === -1) {
+        const room = await db.delete(roomTable).where(and(eq(roomTable.userId, user.id), eq(roomTable.id, id))).returning().then(res => res[0]);
+
+        if (!room) {
             return c.notFound();
         }
 
-        const deleteRoom = fakeRoom.splice(index, 1)[0];
-        return c.json({ room: deleteRoom });
+        return c.json({ room: room });
     })
