@@ -8,6 +8,13 @@
       "when": 1732006460014,
       "tag": "0000_omniscient_norrin_radd",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1732232449120,
+      "tag": "0001_familiar_smiling_tiger",
+      "breakpoints": true
     }
   ]
 }

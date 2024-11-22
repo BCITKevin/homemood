@@ -22,4 +22,5 @@ export const insertRoomsSchema = createInsertSchema(rooms, {
     height: z.string().regex(/^\d+(\.\d{1,2})?$/, {message: "The height must be postive"}),
     isPrivate: z.boolean(),
 })
+
 export const selectRoomsSchema = createSelectSchema(rooms)

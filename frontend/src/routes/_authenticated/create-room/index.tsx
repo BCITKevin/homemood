@@ -1,7 +1,5 @@
 'use client'
 
-// 지금 동적 라우팅으로 바꿨으니까 바꿔도 돌아가는지 이따가 확인 할것.
-
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -10,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { useForm } from '@tanstack/react-form'
 import type { FieldApi } from '@tanstack/react-form'
-import { createRoom, getAllRoomsQueryOptions } from '@/lib/api'
+import { createRoom, getAllRoomsForCreateQueryOptions } from '@/lib/api'
 import { zodValidator } from '@tanstack/zod-form-adapter'
 import { createRoomSchema } from '@server/sharedTypes'
 import { useQueryClient } from '@tanstack/react-query'
@@ -47,7 +45,7 @@ function CreateRoom() {
             isPrivate: false,
         },
         onSubmit: async ({ value }) => {
-            await new Promise((r) => setTimeout(r, 3000))
+            // await new Promise((r) => setTimeout(r, 3000)) = this is for testing
 
             // loading state
             queryClient.setQueryData(['loading-create-room'], { room: value })
@@ -55,9 +53,10 @@ function CreateRoom() {
                 const newRoom = await createRoom({ value })
 
                 const existingRooms = await queryClient.ensureQueryData(
-                    getAllRoomsQueryOptions,
+                    getAllRoomsForCreateQueryOptions,
                 )
-                queryClient.setQueryData(getAllRoomsQueryOptions.queryKey, {
+
+                queryClient.setQueryData(getAllRoomsForCreateQueryOptions.queryKey, {
                     ...existingRooms,
                     rooms: [newRoom, ...existingRooms.rooms],
                 })
