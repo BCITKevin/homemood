@@ -45,8 +45,6 @@ function CreateRoom() {
             isPrivate: false,
         },
         onSubmit: async ({ value }) => {
-            // await new Promise((r) => setTimeout(r, 3000)) = this is for testing
-
             // loading state
             queryClient.setQueryData(['loading-create-room'], { room: value })
             try {

@@ -62,6 +62,13 @@ export async function createRoom({ value }: { value: CreateRoom }) {
   return newRoom;
 }
 
+export async function getUserRoom() {
+  const res = await api.rooms.getUserRooms.$get();
+
+  const rooms = await res.json();
+  return rooms;
+}
+
 export async function getAllRoomFurniture() {
   const res = await api.roomFurniture.$get()
   if (!res.ok) {
@@ -111,6 +118,16 @@ export async function getARoom(id: string) {
   const aRoom = await res.json();
 
   return aRoom;
+}
+
+export async function deleteRoom(id: string) {
+  const res = await api.rooms[":id{[0-9]+}"].$delete({
+    param: { id },
+  })
+
+  const data = res.json();
+
+  return data;
 }
 
 export async function getRoomDataWithRoomFurniture(roomFurniture: CreateRoomFurniture) {

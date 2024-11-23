@@ -16,6 +16,53 @@ export const roomRoute = new Hono()
         
         return c.json({ rooms: rooms });
     })
+    .get('/getUserRooms', getUser, async (c) => {
+        const user = c.var.user;
+
+        const rooms = await db
+        .select({
+            roomId: roomTable.id,
+            roomTitle: roomTable.title,
+            roomWidth: roomTable.width,
+            roomHeight: roomTable.height,
+            isPrivate: roomTable.isPrivate,
+            createdAt: roomTable.createdAt,
+            furnitureId: roomFurnitureTable.furnitureId,
+            furnitureX: roomFurnitureTable.x,
+            furnitureY: roomFurnitureTable.y,
+            furnitureRotate: roomFurnitureTable.rotate,
+            furnitureName: furnitureTable.name,
+            furnitureImageUrl: furnitureTable.imageUrl,
+        })
+        .from(roomFurnitureTable)
+        .innerJoin(roomTable, eq(roomFurnitureTable.roomId, roomTable.id))
+        .innerJoin(furnitureTable, eq(roomFurnitureTable.furnitureId, furnitureTable.id))
+        .where(eq(roomTable.userId, user.id))
+        .orderBy(desc(roomTable.createdAt));
+
+        const groupedRooms = rooms.reduce((acc, row) => {
+            const { roomId, roomTitle, roomWidth, roomHeight, isPrivate, createdAt, ...furniture } = row;
+
+            // @ts-ignore
+            if (!acc[roomId]) {
+                // @ts-ignore
+                acc[roomId] = {
+                    roomId,
+                    roomTitle,
+                    roomWidth,
+                    roomHeight,
+                    isPrivate,
+                    createdAt,
+                    furnitures: []
+                };
+            }
+            // @ts-ignore
+            acc[roomId].furnitures.push(furniture);
+            return acc;
+        }, {});
+
+        return c.json({ rooms: Object.values(groupedRooms) });
+    })
     .get('/', getUser, async (c) => {
         const publicRooms = await db
         .select({
@@ -133,8 +180,13 @@ export const roomRoute = new Hono()
         const id = Number.parseInt(c.req.param("id"));
         const user = c.var.user;
 
-        const room = await db.delete(roomTable).where(and(eq(roomTable.userId, user.id), eq(roomTable.id, id))).returning().then(res => res[0]);
+        await db.delete(roomFurnitureTable).where(eq(roomFurnitureTable.roomId, id));
 
+        const room = await db.delete(roomTable)
+            .where(and(eq(roomTable.userId, user.id), eq(roomTable.id, id)))
+            .returning()
+            .then(res => res[0]);
+    
         if (!room) {
             return c.notFound();
         }

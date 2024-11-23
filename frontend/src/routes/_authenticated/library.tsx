@@ -20,9 +20,6 @@ export const Route = createFileRoute('/_authenticated/library')({
 
 function Library() {
   const { isPending, error, data } = useQuery(getAllRoomsQueryOptions)
-  // const { data: loadingCreateFurniutre } = useQuery(loadingCreateFurnitureQueryOptions)
-
-  console.log(data);
 
   if (error) return 'An error has occurred: ' + error.message
   return (
@@ -114,9 +111,6 @@ function Library() {
                         </div>
                       ))}
                     </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="outline">Copy</Button>
                   </TableCell>
                 </TableRow>
               ))}
